@@ -821,9 +821,10 @@
         function drawRadar(percentages) {
             const chart = echarts.init(document.getElementById('radarChart'));
 
+            // 调整max值，让数据扩散但不超出边界
             const indicator = components.map(comp => ({
                 name: comp.name,
-                max: 100
+                max: 30
             }));
 
             const data = components.map(comp => percentages[comp.id]);
