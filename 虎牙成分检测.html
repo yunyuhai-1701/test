@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虎牙成分浓度检测</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* 开始页面 */
+        .start-page {
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #FF6B00 0%, #FF9500 100%);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #FF6B00 0%, #FF9500 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #FF6B00 0%, #FF9500 100%);
+            color: white;
+            border: none;
+            padding: 15px 60px;
+            border-radius: 50px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255,107,0,0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,107,0,0.5);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* 测试页面 */
+        .quiz-page {
+            display: none;
+            padding: 40px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #FF6B00 0%, #FF9500 100%);
+            border-radius: 3px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .question-number {
+            color: #FF6B00;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 22px;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .quiz-navigation {
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+        }
+
+        .quiz-navigation .btn {
+            flex: 1;
+            padding: 12px 30px;
+        }
+
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            color: #333;
+            text-align: left;
+        }
+
+        .option:hover {
+            border-color: #FF6B00;
+            background: #fff5f0;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: linear-gradient(135deg, #FF6B00 0%, #FF9500 100%);
+            border-color: #FF6B00;
+            color: white;
+            transform: scale(1.02);
+        }
+
+        /* 结果页面 */
+        .result-page {
+            display: none;
+            padding: 40px;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .result-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF6B00 0%, #FF9500 100%);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .main-component {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .main-component-title {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .main-component-value {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #FF6B00 0%, #FF9500 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-component-name {
+            font-size: 24px;
+            color: #333;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .components-list {
+            margin: 30px 0;
+        }
+
+        .components-list-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .component-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .component-item:hover {
+            background: #fff5f0;
+        }
+
+        .component-name {
+            width: 80px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .component-bar-container {
+            flex: 1;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .component-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #FF6B00 0%, #FF9500 100%);
+            border-radius: 10px;
+            transition: width 1s ease-out;
+            width: 0;
+        }
+
+        .component-percent {
+            width: 50px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: bold;
+            color: #FF6B00;
+            margin-left: 10px;
+        }
+
+        #radarChart {
+            width: 100%;
+            height: 400px;
+            margin: 20px 0;
+        }
+
+        .comment {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #FF6B00;
+        }
+
+        .comment-title {
+            font-weight: bold;
+            color: #FF6B00;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .comment-text {
+            color: #666;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #FF6B00;
+            border: 2px solid #FF6B00;
+        }
+
+        .btn-secondary:hover {
+            background: #fff5f0;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+            padding: 15px 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 响应式 */
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .start-page {
+                padding: 40px 20px;
+            }
+
+            .quiz-page, .result-page {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .question-text {
+                font-size: 18px;
+            }
+
+            .option {
+                padding: 15px;
+                font-size: 14px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* 加载动画 */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 开始页面 -->
+        <div class="start-page" id="startPage">
+            <div class="logo">🐯</div>
+            <h1>虎牙成分浓度检测</h1>
+            <p class="subtitle">
+                20道题测出你的虎牙DNA<br>
+                快来测测你的成分吧！
+            </p>
+            <button class="btn" onclick="startQuiz()">开始测试</button>
+        </div>
+
+        <!-- 测试页面 -->
+        <div class="quiz-page" id="quizPage">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div class="question-number" id="questionNumber">第1题 / 20</div>
+            <div class="question-text" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="quiz-navigation">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()">上一题</button>
+                <button class="btn" id="nextBtn" onclick="nextQuestion()" style="display:none;">下一题</button>
+            </div>
+        </div>
+
+        <!-- 结果页面 -->
+        <div class="result-page" id="resultPage">
+            <div class="result-header">
+                <h2 class="result-title">你的虎牙DNA检测结果</h2>
+                <div class="result-badge" id="badgeTitle"></div>
+            </div>
+
+            <div class="main-component">
+                <div class="main-component-title">主要成分</div>
+                <div class="main-component-value" id="mainPercent"></div>
+                <div class="main-component-name" id="mainComponent"></div>
+            </div>
+
+            <div class="components-list">
+                <div class="components-list-title">📊 完整成分分析</div>
+                <div id="componentsList"></div>
+            </div>
+
+            <div id="radarChart"></div>
+
+            <div class="comment">
+                <div class="comment-title">🎯 恶臭评价</div>
+                <div class="comment-text" id="commentText"></div>
+            </div>
+
+            <div class="comment">
+                <div class="comment-title">💊 治疗建议</div>
+                <div class="comment-text" id="suggestionText"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="location.reload()">重新测试</button>
+                <button class="btn" onclick="shareResult()">分享结果</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script>
+        // 成分定义
+        const components = [
+            { id: 'xiaozi', name: '孝子', color: '#FF6B6B' },
+            { id: 'duixian', name: '对线怪', color: '#4ECDC4' },
+            { id: 'baipiao', name: '白嫖怪', color: '#45B7D1' },
+            { id: 'jiezou', name: '节奏带师', color: '#FFA07A' },
+            { id: 'yunwanjia', name: '云玩家', color: '#98D8C8' },
+            { id: 'yinyang', name: '阴阳人', color: '#F7B731' },
+            { id: 'fudu', name: '复读机', color: '#5F27CD' },
+            { id: 'qianshui', name: '潜水王', color: '#00A8FF' },
+            { id: 'diaoyu', name: '钓鱼佬', color: '#EE5A6F' },
+            { id: 'kaogu', name: '考古怪', color: '#C23616' },
+            { id: 'pofang', name: '破防怪', color: '#273C75' },
+            { id: 'jubao', name: '举报狗', color: '#E74C3C' },
+            { id: 'yuanzhong', name: '冤种', color: '#E056FD' },
+            { id: 'yinliu', name: '引流狗', color: '#686DE0' },
+            { id: 'chigua', name: '吃瓜怪', color: '#FFBE76' }
+        ];
+
+        // 题目和选项（每个选项对应的成分ID）
+        const questions = [
+            {
+                q: "看到队友菜，你会？",
+                options: [
+                    { text: "A. \"你这个妖怪呀，我XX\"", components: ['duixian'] },
+                    { text: "B. \"你这都不会？建议多玩\"", components: ['yunwanjia', 'yinyang'] },
+                    { text: "C. 默默看着", components: ['qianshui'] },
+                    { text: "D. 截图挂到群里", components: ['jiezou'] }
+                ]
+            },
+            {
+                q: "看到有人喷你主播，你会？",
+                options: [
+                    { text: "A. \"你再说一遍？报地址！\"", components: ['xiaozi', 'duixian'] },
+                    { text: "B. \"确实，但是你主子也不行啊\"", components: ['yinyang'] },
+                    { text: "C. 冲到对方直播间开骂", components: ['duixian', 'jiezou'] },
+                    { text: "D. 看戏吃瓜", components: ['chigua'] }
+                ]
+            },
+            {
+                q: "主播操作失误，你会？",
+                options: [
+                    { text: "A. \"反向Q了家人们，蚌埠住了\"", components: ['fudu', 'yinyang'] },
+                    { text: "B. \"你这么玩不对，应该...\"", components: ['yunwanjia'] },
+                    { text: "C. \"主播没问题，是队友菜\"", components: ['xiaozi'] },
+                    { text: "D. 录屏发B站挂人", components: ['jiezou', 'kaogu'] }
+                ]
+            },
+            {
+                q: "看到有人刷大礼物，你会？",
+                options: [
+                    { text: "A. \"大冤种\"、\"人傻钱多\"", components: ['baipiao', 'duixian'] },
+                    { text: "B. 立刻跟着刷更大的", components: ['yuanzhong', 'xiaozi'] },
+                    { text: "C. \"老板大气\"复读", components: ['fudu'] },
+                    { text: "D. \"有钱不如给我\"", components: ['baipiao'] }
+                ]
+            },
+            {
+                q: "主播说\"点点关注家人们\"，你会？",
+                options: [
+                    { text: "A. 立刻送藏宝图", components: ['yuanzhong', 'xiaozi'] },
+                    { text: "B. 关注了但不送礼", components: ['baipiao'] },
+                    { text: "C. \"你配吗？\"", components: ['duixian'] },
+                    { text: "D. 顺手去隔壁刷\"来看XXX\"", components: ['yinliu'] }
+                ]
+            },
+            {
+                q: "看到弹幕吵起来，你会？",
+                options: [
+                    { text: "A. \"急了急了\"、\"破防了\"", components: ['yinyang'] },
+                    { text: "B. 加入战场疯狂对线", components: ['duixian'] },
+                    { text: "C. \"前排吃瓜\"、\"有瓜不吃王八蛋\"", components: ['chigua'] },
+                    { text: "D. 假装是对方粉丝说极端话", components: ['diaoyu', 'jiezou'] }
+                ]
+            },
+            {
+                q: "主播被质疑，你会？",
+                options: [
+                    { text: "A. \"建议去看XX年XX月录播\"", components: ['kaogu', 'jiezou'] },
+                    { text: "B. \"主播没错，都是黑子带节奏\"", components: ['xiaozi'] },
+                    { text: "C. \"确实，有一说一客观评价\"", components: ['yinyang'] },
+                    { text: "D. 不说话看热闹", components: ['chigua', 'qianshui'] }
+                ]
+            },
+            {
+                q: "你一个月在虎牙花多少钱？",
+                options: [
+                    { text: "A. 0元纯白嫖，还骂刷钱的", components: ['baipiao', 'duixian'] },
+                    { text: "B. 工资全刷了，\"我是真爱粉\"", components: ['yuanzhong', 'xiaozi'] },
+                    { text: "C. 50块意思意思", components: ['qianshui'] },
+                    { text: "D. 只在主播被喷时刷礼物", components: ['xiaozi'] }
+                ]
+            },
+            {
+                q: "看到UZI式操作，你会？",
+                options: [
+                    { text: "A. \"666起飞\"刷到手抽筋", components: ['fudu'] },
+                    { text: "B. \"就这？我上我也行\"", components: ['yunwanjia', 'duixian'] },
+                    { text: "C. \"其实吧XX主播也能打\"", components: ['yinliu', 'yinyang'] },
+                    { text: "D. 不说话", components: ['qianshui'] }
+                ]
+            },
+            {
+                q: "主播说\"你们再乱带节奏我下播\"，你会？",
+                options: [
+                    { text: "A. \"你下吧，隔壁更好看\"", components: ['yinliu', 'duixian'] },
+                    { text: "B. \"别啊主播，都是黑子\"", components: ['xiaozi', 'pofang'] },
+                    { text: "C. 继续带节奏", components: ['jiezou'] },
+                    { text: "D. \"急了急了\"", components: ['yinyang'] }
+                ]
+            },
+            {
+                q: "看到有人发违规内容，你会？",
+                options: [
+                    { text: "A. \"已截图，等着吧\"", components: ['jubao'] },
+                    { text: "B. 跟着一起刷", components: ['fudu'] },
+                    { text: "C. 不关我事", components: ['qianshui', 'baipiao'] },
+                    { text: "D. \"房管呢？吃饭去了？\"", components: ['duixian'] }
+                ]
+            },
+            {
+                q: "主播说\"训练赛没输过\"，你会？",
+                options: [
+                    { text: "A. \"乐观家族族长是吧\"", components: ['yinyang'] },
+                    { text: "B. \"主播牛逼！\"", components: ['xiaozi'] },
+                    { text: "C. \"吹牛逼谁不会\"", components: ['duixian', 'yunwanjia'] },
+                    { text: "D. 翻出之前被锤录像", components: ['kaogu', 'jiezou'] }
+                ]
+            },
+            {
+                q: "被别人怼了一句，你会？",
+                options: [
+                    { text: "A. \"你再说一遍？急了是吧？\"", components: ['pofang', 'duixian'] },
+                    { text: "B. 小号私信骚扰", components: ['duixian'] },
+                    { text: "C. 不理", components: ['qianshui'] },
+                    { text: "D. \"笑死，又来一个\"", components: ['yinyang'] }
+                ]
+            },
+            {
+                q: "看到主播女装，你会？",
+                options: [
+                    { text: "A. \"姿态是你吗，爱了\"", components: ['fudu', 'xiaozi'] },
+                    { text: "B. \"辣眼睛，恶心\"", components: ['duixian'] },
+                    { text: "C. 录屏做鬼畜", components: ['kaogu', 'jiezou'] },
+                    { text: "D. \"确实好看\"", components: ['yinyang'] }
+                ]
+            },
+            {
+                q: "主播被挂到贴吧，你会？",
+                options: [
+                    { text: "A. 去贴吧怼黑子", components: ['xiaozi', 'duixian'] },
+                    { text: "B. 去贴吧加料", components: ['jiezou'] },
+                    { text: "C. 搬运到各个群", components: ['jiezou', 'chigua'] },
+                    { text: "D. \"前排吃瓜，坐等反转\"", components: ['chigua'] }
+                ]
+            },
+            {
+                q: "你看直播主要干嘛？",
+                options: [
+                    { text: "A. 疯狂刷礼物刷存在感", components: ['yuanzhong', 'xiaozi'] },
+                    { text: "B. 跟人对线", components: ['duixian'] },
+                    { text: "C. 挂着白嫖", components: ['baipiao', 'qianshui'] },
+                    { text: "D. 找黑料带节奏", components: ['jiezou', 'kaogu'] }
+                ]
+            },
+            {
+                q: "主播说\"感谢XXX送的礼物\"，你会？",
+                options: [
+                    { text: "A. \"不谢我？我也送了！\"", components: ['pofang', 'yuanzhong'] },
+                    { text: "B. \"冤种\"", components: ['baipiao', 'duixian'] },
+                    { text: "C. 继续刷更大的礼物", components: ['yuanzhong', 'xiaozi'] },
+                    { text: "D. 无感", components: ['qianshui'] }
+                ]
+            },
+            {
+                q: "看到\"您配吗\"，你会？",
+                options: [
+                    { text: "A. 立刻复读100遍", components: ['fudu'] },
+                    { text: "B. \"药水哥是吧，经典\"", components: ['kaogu'] },
+                    { text: "C. \"死梗还刷\"", components: ['duixian'] },
+                    { text: "D. \"确实不配\"", components: ['yinyang'] }
+                ]
+            },
+            {
+                q: "主播下播了，你会？",
+                options: [
+                    { text: "A. \"不许下播！再播会儿\"", components: ['xiaozi', 'pofang'] },
+                    { text: "B. 去隔壁房间刷\"XXX下播了\"", components: ['yinliu'] },
+                    { text: "C. 早睡了", components: ['baipiao', 'qianshui'] },
+                    { text: "D. \"终于下了，等半天\"", components: ['duixian'] }
+                ]
+            },
+            {
+                q: "你觉得自己是什么类型？",
+                options: [
+                    { text: "A. 主播忠实粉丝", components: ['xiaozi'] },
+                    { text: "B. 纯白嫖，一分不花", components: ['baipiao'] },
+                    { text: "C. 云玩家，爱指点江山", components: ['yunwanjia'] },
+                    { text: "D. 喜欢对线和带节奏", components: ['duixian', 'jiezou'] }
+                ]
+            }
+        ];
+
+        // 称号系统
+        const badges = [
+            { combo: ['xiaozi', 'yuanzhong'], title: '氪金孝子大冤种', comment: '工资全刷了还觉得值，主播的提款机', suggestion: '清醒点，钱留着买点好吃的吧' },
+            { combo: ['duixian', 'jiezou'], title: '职业对线带节奏', comment: '走到哪吵到哪，房间毒瘤', suggestion: '少喷点人，多看看游戏，别让大家以为你只会打字' },
+            { combo: ['baipiao', 'yinyang'], title: '白嫖阴阳大师', comment: '白嫖得理直气壮，还阴阳怪气', suggestion: '要么刷礼物要么闭嘴，别白嫖还bb' },
+            { combo: ['yunwanjia', 'duixian'], title: '云端嘴炮教练', comment: '不玩游戏，光会喷人教主播', suggestion: '建议多玩玩游戏，别张口就来' },
+            { combo: ['kaogu', 'jiezou'], title: '考古带节奏专业户', comment: '专翻黑历史搞事情，职业节奏大师', suggestion: '放过主播吧，人都要进步的' },
+            { combo: ['fudu', 'xiaozi'], title: '666刷屏孝子', comment: '666刷到手抽筋，无脑吹主播', suggestion: '夸也要有点营养，别只会666' },
+            { combo: ['diaoyu', 'jiezou'], title: '反串钓鱼大师', comment: '假装粉丝说极端话，坐等双方开撕', suggestion: '钓鱼有意思吗？被发现就尴尬了' },
+            { combo: ['pofang', 'duixian'], title: '玻璃心对线怪', comment: '被说一句就暴走，防御力为0', suggestion: '心态练练，别动不动就破防' }
+        ];
+
+        // 单一成分的默认评价
+        const singleComments = {
+            'xiaozi': { comment: '无脑护主播，疯狂刷礼物，典型孝子行为', suggestion: '理性追星，主播不一定认识你' },
+            'duixian': { comment: '见人就想骂，典型对线怪，嘴臭狂魔', suggestion: '少喷点人，对线伤身' },
+            'baipiao': { comment: '一分不花还理直气壮，白嫖界的天花板', suggestion: '偶尔送点小礼物，别太白嫖' },
+            'jiezou': { comment: '专业搞事，跨房间带节奏，职业选手', suggestion: '消停点吧，别搞事了' },
+            'yunwanjia': { comment: '不玩游戏光指点，典型云玩家', suggestion: '多玩玩游戏再说话' },
+            'yinyang': { comment: '不直接骂人，专门阴阳怪气内涵', suggestion: '有话直说，别阴阳怪气' },
+            'fudu': { comment: '无脑复读，666刷不停，复读机本机', suggestion: '说点有营养的，别只会复读' },
+            'qianshui': { comment: '只看不说，隐形人本人，潜水界王者', suggestion: '偶尔冒个泡，别太潜水' },
+            'diaoyu': { comment: '反串引战，看热闹不嫌事大', suggestion: '别钓鱼了，小心被反钓' },
+            'kaogu': { comment: '专翻黑历史，考古界专业人士', suggestion: '放过主播吧，翻黑历史没意思' },
+            'pofang': { comment: '玻璃心，说一句就暴走，防御力为0', suggestion: '心态练练，别动不动破防' },
+            'jubao': { comment: '举报成瘾，看啥都违规，举报狗本狗', suggestion: '少举报点，别啥都举报' },
+            'yuanzhong': { comment: '被割韭菜还感动，大冤种本种', suggestion: '清醒点，别当冤种了' },
+            'yinliu': { comment: '到处引流，专业引流狗', suggestion: '别引流了，很招人烦' },
+            'chigua': { comment: '只在撕逼时出现，吃瓜群众本众', suggestion: '吃瓜要低调，别太活跃' }
+        };
+
+        let currentQuestion = 0;
+        let scores = {};
+        let userAnswers = []; // 记录每题的选择
+
+        // 初始化分数
+        components.forEach(comp => {
+            scores[comp.id] = 0;
+        });
+
+        function startQuiz() {
+            console.log('开始测试');
+            const startPage = document.getElementById('startPage');
+            const quizPage = document.getElementById('quizPage');
+            console.log('startPage:', startPage);
+            console.log('quizPage:', quizPage);
+
+            if (startPage && quizPage) {
+                startPage.style.display = 'none';
+                quizPage.style.display = 'block';
+                showQuestion();
+            } else {
+                console.error('页面元素未找到');
+            }
+        }
+
+        function showQuestion() {
+            console.log('显示问题:', currentQuestion);
+            const question = questions[currentQuestion];
+            console.log('问题数据:', question);
+
+            document.getElementById('questionNumber').textContent = `第${currentQuestion + 1}题 / ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            document.getElementById('progressBar').style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option.text;
+
+                // 如果该题已有答案，高亮显示
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            // 更新按钮状态
+            updateNavigationButtons();
+        }
+
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            // 第一题时禁用上一题按钮
+            if (currentQuestion === 0) {
+                prevBtn.classList.add('btn-disabled');
+            } else {
+                prevBtn.classList.remove('btn-disabled');
+            }
+
+            // 如果当前题已经选择，显示下一题按钮
+            if (userAnswers[currentQuestion] !== undefined) {
+                nextBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'none';
+            }
+        }
+
+        function selectOption(index) {
+            const question = questions[currentQuestion];
+            console.log('selectOption - 题号:', currentQuestion, '选择:', index);
+
+            // 记录答案
+            userAnswers[currentQuestion] = index;
+            console.log('当前所有答案:', userAnswers);
+
+            // 视觉反馈
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            options[index].classList.add('selected');
+
+            // 显示下一题按钮
+            document.getElementById('nextBtn').style.display = 'block';
+
+            // 延迟后自动跳转下一题
+            setTimeout(() => {
+                nextQuestion();
+            }, 500);
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            console.log('nextQuestion - 当前题号:', currentQuestion, '总题数:', questions.length);
+
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                console.log('这是最后一题，准备显示结果');
+                // 最后一题，计算结果
+                calculateScores();
+                showResult();
+            }
+        }
+
+        function calculateScores() {
+            // 重置分数
+            components.forEach(comp => {
+                scores[comp.id] = 0;
+            });
+
+            // 根据所有答案计算分数
+            userAnswers.forEach((answerIndex, questionIndex) => {
+                if (answerIndex !== undefined) {
+                    const question = questions[questionIndex];
+                    const selectedOption = question.options[answerIndex];
+                    selectedOption.components.forEach(compId => {
+                        scores[compId]++;
+                    });
+                }
+            });
+        }
+
+        function showResult() {
+            console.log('显示结果页面');
+            console.log('分数:', scores);
+
+            const quizPage = document.getElementById('quizPage');
+            const resultPage = document.getElementById('resultPage');
+
+            quizPage.style.display = 'none';
+            resultPage.style.display = 'block';
+
+            // 计算百分比
+            const total = Object.values(scores).reduce((a, b) => a + b, 0);
+            console.log('总分:', total);
+
+            const percentages = {};
+            components.forEach(comp => {
+                percentages[comp.id] = Math.round((scores[comp.id] / total) * 100);
+            });
+            console.log('百分比:', percentages);
+
+            // 找出前两名成分
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            const topComponent = sorted[0];
+            const secondComponent = sorted[1];
+            console.log('第一名:', topComponent);
+            console.log('第二名:', secondComponent);
+
+            // 显示主要成分
+            const mainComp = components.find(c => c.id === topComponent[0]);
+            document.getElementById('mainPercent').textContent = `${topComponent[1]}%`;
+            document.getElementById('mainComponent').textContent = mainComp.name;
+
+            // 查找称号
+            let badge = null;
+            for (let b of badges) {
+                if (b.combo.includes(topComponent[0]) && b.combo.includes(secondComponent[0])) {
+                    badge = b;
+                    break;
+                }
+            }
+
+            // 如果没有匹配的combo，使用单一成分的默认评价
+            if (!badge) {
+                badge = {
+                    title: `${mainComp.name}本${mainComp.name === '冤种' ? '种' : mainComp.name.slice(-1)}`,
+                    comment: singleComments[topComponent[0]].comment,
+                    suggestion: singleComments[topComponent[0]].suggestion
+                };
+            }
+
+            console.log('称号:', badge);
+
+            document.getElementById('badgeTitle').textContent = badge.title;
+            document.getElementById('commentText').textContent = badge.comment;
+            document.getElementById('suggestionText').textContent = badge.suggestion;
+
+            // 显示完整成分列表
+            showComponentsList(percentages);
+
+            // 绘制雷达图
+            drawRadar(percentages);
+        }
+
+        function showComponentsList(percentages) {
+            const listContainer = document.getElementById('componentsList');
+            listContainer.innerHTML = '';
+
+            // 按百分比排序
+            const sorted = Object.entries(percentages)
+                .map(([id, percent]) => {
+                    const comp = components.find(c => c.id === id);
+                    return { id, name: comp.name, percent };
+                })
+                .sort((a, b) => b.percent - a.percent);
+
+            sorted.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'component-item';
+
+                itemDiv.innerHTML = `
+                    <div class="component-name">${item.name}</div>
+                    <div class="component-bar-container">
+                        <div class="component-bar" data-percent="${item.percent}"></div>
+                    </div>
+                    <div class="component-percent">${item.percent}%</div>
+                `;
+
+                listContainer.appendChild(itemDiv);
+            });
+
+            // 动画效果
+            setTimeout(() => {
+                document.querySelectorAll('.component-bar').forEach(bar => {
+                    const percent = bar.getAttribute('data-percent');
+                    bar.style.width = percent + '%';
+                });
+            }, 100);
+        }
+
+        function drawRadar(percentages) {
+            const chart = echarts.init(document.getElementById('radarChart'));
+
+            const indicator = components.map(comp => ({
+                name: comp.name,
+                max: 100
+            }));
+
+            const data = components.map(comp => percentages[comp.id]);
+
+            const option = {
+                radar: {
+                    indicator: indicator,
+                    shape: 'circle',
+                    splitNumber: 5,
+                    name: {
+                        textStyle: {
+                            color: '#333',
+                            fontSize: 12
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: ['#e0e0e0', '#e8e8e8', '#f0f0f0', '#f8f8f8', '#fcfcfc']
+                        }
+                    },
+                    splitArea: {
+                        show: true,
+                        areaStyle: {
+                            color: ['rgba(255,107,0,0.05)', 'rgba(255,107,0,0.02)']
+                        }
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#e0e0e0'
+                        }
+                    }
+                },
+                series: [{
+                    type: 'radar',
+                    data: [{
+                        value: data,
+                        name: '成分分析',
+                        areaStyle: {
+                            color: 'rgba(255,107,0,0.3)'
+                        },
+                        lineStyle: {
+                            color: '#FF6B00',
+                            width: 2
+                        },
+                        itemStyle: {
+                            color: '#FF6B00'
+                        }
+                    }]
+                }]
+            };
+
+            chart.setOption(option);
+        }
+
+        function shareResult() {
+            alert('分享功能开发中...\n\n你可以截图分享给朋友！');
+        }
+    </script>
+</body>
+</html>
