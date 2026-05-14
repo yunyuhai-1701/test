@@ -228,63 +228,9 @@
             font-weight: bold;
         }
 
-        .components-list {
-            margin: 30px 0;
-        }
-
-        .components-list-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .component-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
-        .component-item:hover {
-            background: #fff5f0;
-        }
-
-        .component-name {
-            width: 80px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .component-bar-container {
-            flex: 1;
-            height: 20px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .component-bar {
-            height: 100%;
-            background: linear-gradient(135deg, #FF6B00 0%, #FF9500 100%);
-            border-radius: 10px;
-            transition: width 1s ease-out;
-            width: 0;
-        }
-
-        .component-percent {
-            display: none;
-        }
-
         #radarChart {
             width: 100%;
-            height: 500px;
+            height: 600px;
             margin: 20px 0;
         }
 
@@ -930,27 +876,29 @@
                 radar: {
                     indicator: indicator,
                     shape: 'circle',
-                    splitNumber: 5,
+                    splitNumber: 4,
+                    radius: '75%',
                     name: {
                         textStyle: {
                             color: '#333',
-                            fontSize: 12
+                            fontSize: 14,
+                            fontWeight: 'bold'
                         }
                     },
                     splitLine: {
                         lineStyle: {
-                            color: ['#e0e0e0', '#e8e8e8', '#f0f0f0', '#f8f8f8', '#fcfcfc']
+                            color: ['#e0e0e0', '#e8e8e8', '#f0f0f0', '#f8f8f8']
                         }
                     },
                     splitArea: {
                         show: true,
                         areaStyle: {
-                            color: ['rgba(255,107,0,0.05)', 'rgba(255,107,0,0.02)']
+                            color: ['rgba(255,107,0,0.08)', 'rgba(255,107,0,0.04)', 'rgba(255,107,0,0.02)', 'rgba(255,107,0,0.01)']
                         }
                     },
                     axisLine: {
                         lineStyle: {
-                            color: '#e0e0e0'
+                            color: '#d0d0d0'
                         }
                     }
                 },
@@ -960,15 +908,21 @@
                         value: data,
                         name: '成分分析',
                         areaStyle: {
-                            color: 'rgba(255,107,0,0.3)'
+                            color: 'rgba(255,107,0,0.5)'
                         },
                         lineStyle: {
                             color: '#FF6B00',
-                            width: 2
+                            width: 5,
+                            shadowColor: 'rgba(255,107,0,0.4)',
+                            shadowBlur: 10
                         },
                         itemStyle: {
-                            color: '#FF6B00'
-                        }
+                            color: '#FF6B00',
+                            borderWidth: 3,
+                            borderColor: '#fff'
+                        },
+                        symbol: 'circle',
+                        symbolSize: 10
                     }]
                 }]
             };
