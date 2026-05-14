@@ -367,11 +367,6 @@
                 <div class="main-component-name" id="mainComponent"></div>
             </div>
 
-            <div class="components-list">
-                <div class="components-list-title">📊 完整成分分析</div>
-                <div id="componentsList"></div>
-            </div>
-
             <div id="radarChart"></div>
 
             <div class="comment">
@@ -819,47 +814,8 @@
             document.getElementById('commentText').textContent = badge.comment;
             document.getElementById('suggestionText').textContent = badge.suggestion;
 
-            // 显示完整成分列表
-            showComponentsList(percentages);
-
             // 绘制雷达图
             drawRadar(percentages);
-        }
-
-        function showComponentsList(percentages) {
-            const listContainer = document.getElementById('componentsList');
-            listContainer.innerHTML = '';
-
-            // 按百分比排序
-            const sorted = Object.entries(percentages)
-                .map(([id, percent]) => {
-                    const comp = components.find(c => c.id === id);
-                    return { id, name: comp.name, percent };
-                })
-                .sort((a, b) => b.percent - a.percent);
-
-            sorted.forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'component-item';
-
-                itemDiv.innerHTML = `
-                    <div class="component-name">${item.name}</div>
-                    <div class="component-bar-container">
-                        <div class="component-bar" data-percent="${item.percent}"></div>
-                    </div>
-                    <div class="component-percent">${item.percent}%</div>
-                `;
-
-                listContainer.appendChild(itemDiv);
-            });
-
-            // 动画效果
-            setTimeout(() => {
-                document.querySelectorAll('.component-bar').forEach(bar => {
-                    const percent = bar.getAttribute('data-percent');
-                    bar.style.width = percent + '%';
-                });
-            }, 100);
         }
 
         function drawRadar(percentages) {
